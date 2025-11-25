@@ -85,8 +85,9 @@ bool ProgressiveJPEGStrategy::loadImage(const QString& filename, QImage& image) 
                 
                 // При первой загрузке применяем размытие для эмуляции первого приближения
                 // Прогрессивный JPEG сначала показывает размытое изображение, затем добавляет детали
-                image = applyBlur(originalImage, 8); // Сильное размытие для первого скана
+                // Скан 1: максимальное размытие (8)
                 currentScan = 1;
+                image = applyBlur(originalImage, 8); // Сильное размытие для первого скана
                 
                 return true;
             }
@@ -101,6 +102,7 @@ bool ProgressiveJPEGStrategy::loadNextScan(QImage& image) {
         return false;
     }
     
+    // Увеличиваем номер скана
     currentScan++;
     
     // С каждым сканом уменьшаем размытие (улучшаем качество)
@@ -144,20 +146,26 @@ QImage ProgressiveJPEGStrategy::applyBlur(const QImage& image, int radius) {
         return image;
     }
     
-    QImage result = image.copy();
+    // Создаем новое изображение для результата
+    QImage result = QImage(image.size(), image.format());
     
-    // Простое размытие через усреднение соседних пикселей
-    // Обрабатываем только каждый N-й пиксель для ускорения
+    // Применяем простое размытие через усреднение соседних пикселей
+    // Для ускорения обрабатываем с шагом (больше radius = больше шаг)
     int step = qMax(1, radius / 2);
     
-    for (int y = radius; y < result.height() - radius; y += step) {
-        for (int x = radius; x < result.width() - radius; x += step) {
+    for (int y = 0; y < result.height(); y += step) {
+        for (int x = 0; x < result.width(); x += step) {
             int r = 0, g = 0, b = 0, count = 0;
             
-            // Усредняем пиксели в области radius x radius
-            for (int dy = -radius; dy <= radius; dy += step) {
-                for (int dx = -radius; dx <= radius; dx += step) {
-                    QColor c = result.pixelColor(x + dx, y + dy);
+            // Усредняем пиксели в квадратной области radius x radius
+            int yStart = qMax(0, y - radius);
+            int yEnd = qMin(result.height() - 1, y + radius);
+            int xStart = qMax(0, x - radius);
+            int xEnd = qMin(result.width() - 1, x + radius);
+            
+            for (int py = yStart; py <= yEnd; py++) {
+                for (int px = xStart; px <= xEnd; px++) {
+                    QColor c = image.pixelColor(px, py);
                     r += c.red();
                     g += c.green();
                     b += c.blue();
@@ -169,21 +177,12 @@ QImage ProgressiveJPEGStrategy::applyBlur(const QImage& image, int radius) {
                 r /= count;
                 g /= count;
                 b /= count;
-                result.setPixelColor(x, y, QColor(r, g, b));
-            }
-        }
-    }
-    
-    // Заполняем пропущенные пиксели интерполяцией
-    if (step > 1) {
-        for (int y = 0; y < result.height(); ++y) {
-            for (int x = 0; x < result.width(); ++x) {
-                if (result.pixelColor(x, y).alpha() == 0) {
-                    // Берем цвет ближайшего обработанного пикселя
-                    int nearestX = (x / step) * step;
-                    int nearestY = (y / step) * step;
-                    if (nearestX < result.width() && nearestY < result.height()) {
-                        result.setPixelColor(x, y, result.pixelColor(nearestX, nearestY));
+                QColor avgColor(r, g, b);
+                
+                // Заполняем область step x step усредненным цветом
+                for (int py = y; py < qMin(result.height(), y + step); py++) {
+                    for (int px = x; px < qMin(result.width(), x + step); px++) {
+                        result.setPixelColor(px, py, avgColor);
                     }
                 }
             }
