@@ -1,0 +1,12 @@
+pipeline:
+  build:
+    image: ubuntu:22.04
+    commands:
+      - apt-get update
+      - apt-get install -y qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools build-essential
+      - export PATH=/usr/lib/qt6/bin:$PATH
+      - qmake6 jpeg_viewer.pro || qmake jpeg_viewer.pro
+      - make -j$(nproc)
+    when:
+      event: [ push, pull_request ]
+
