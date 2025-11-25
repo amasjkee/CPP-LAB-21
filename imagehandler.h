@@ -6,7 +6,6 @@
 #include <QtCore/QString>
 #include <QtCore/QtGlobal>
 
-// Factory Pattern: Создание обработчиков изображений
 class ImageHandler {
 public:
     enum HandlerType {
@@ -20,8 +19,7 @@ public:
     virtual bool loadImage(const QString& filename, QImage& image) = 0;
     virtual bool saveImage(const QString& filename, const QImage& image, 
                           int quality, bool progressive, int dctMethod) = 0;
-    
-    // Для прогрессивной загрузки
+
     virtual bool loadNextScan(QImage& image) { Q_UNUSED(image); return false; }
     virtual bool hasMoreScans() const { return false; }
     virtual void reset() {}

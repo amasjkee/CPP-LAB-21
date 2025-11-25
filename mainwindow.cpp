@@ -21,19 +21,16 @@ MainWindow::~MainWindow()
 void MainWindow::setupUI()
 {
     setWindowTitle("JPEG Viewer with Progressive Loading");
-    // Увеличиваем размер окна для лучшего отображения изображений
     setMinimumSize(1200, 900);
     resize(1200, 900);
-    
-    // Создаем status bar для отображения сообщений
+
     statusBar()->showMessage("Ready");
     
     QWidget* centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
     
     QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
-    
-    // Кнопки загрузки и сохранения
+
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     loadButton = new QPushButton("Load JPEG", this);
     saveButton = new QPushButton("Save JPEG", this);
@@ -47,18 +44,15 @@ void MainWindow::setupUI()
     buttonLayout->addStretch();
     
     mainLayout->addLayout(buttonLayout);
-    
-    // Отображение изображения - увеличиваем размер
+
     imageLabel = new QLabel(this);
     imageLabel->setAlignment(Qt::AlignCenter);
     imageLabel->setStyleSheet("QLabel { border: 2px solid gray; background-color: #2b2b2b; }");
     imageLabel->setMinimumSize(1000, 700);
     imageLabel->setText("No image loaded");
-    // Разрешаем масштабирование изображения
     imageLabel->setScaledContents(false);
     mainLayout->addWidget(imageLabel);
-    
-    // Настройки сохранения
+
     QHBoxLayout* saveOptionsLayout = new QHBoxLayout();
     
     progressiveCheckBox = new QCheckBox("Progressive", this);
@@ -86,8 +80,7 @@ void MainWindow::setupUI()
     
     mainLayout->addLayout(saveOptionsLayout);
     mainLayout->addStretch();
-    
-    // Подключение сигналов
+
     connect(loadButton, &QPushButton::clicked, this, &MainWindow::onLoadButtonClicked);
     connect(saveButton, &QPushButton::clicked, this, &MainWindow::onSaveButtonClicked);
     connect(nextScanButton, &QPushButton::clicked, this, &MainWindow::onNextScanButtonClicked);
@@ -106,18 +99,15 @@ void MainWindow::onLoadButtonClicked()
     if (filename.isEmpty()) {
         return;
     }
-    
-    // Определяем тип обработчика на основе файла
+
     QFileInfo fileInfo(filename);
     ImageHandler::HandlerType handlerType = ImageHandler::Progressive;
-    
-    // Пересоздаем обработчик если нужно
+
     if (imageHandler) {
         delete imageHandler;
     }
     imageHandler = ImageHandler::createHandler(handlerType);
-    
-    // Создаем команду загрузки
+
     if (loadCommand) {
         delete loadCommand;
     }
@@ -158,11 +148,8 @@ void MainWindow::onSaveButtonClicked()
 void MainWindow::onNextScanButtonClicked()
 {
     if (loadCommand && loadCommand->canLoadNextScan()) {
-        // Загружаем следующее приближение
         loadCommand->executeNextScan();
-        // Обновляем состояние кнопки
         updateNextScanButton();
-        // Показываем сообщение о загрузке следующего скана
         statusBar()->showMessage(QString("Loaded next scan. Click '>' to load more."), 2000);
     } else {
         statusBar()->showMessage("No more scans available", 2000);
@@ -172,14 +159,12 @@ void MainWindow::onNextScanButtonClicked()
 void MainWindow::onQualityChanged(int value)
 {
     Q_UNUSED(value);
-    // Обновление происходит автоматически через сигналы
 }
 
 void MainWindow::onImageLoaded(const QImage& image)
 {
     currentImage = image;
     updateImageDisplay(image);
-    // Обновляем кнопку после загрузки изображения
     updateNextScanButton();
 }
 
@@ -201,9 +186,6 @@ void MainWindow::updateImageDisplay(const QImage& image)
     
     QPixmap pixmap = QPixmap::fromImage(image);
     QSize labelSize = imageLabel->size();
-    
-    // Масштабируем изображение, чтобы оно помещалось в label, но сохраняем пропорции
-    // Используем максимальный размер для лучшего отображения
     QSize scaledSize = pixmap.size();
     scaledSize.scale(labelSize, Qt::KeepAspectRatio);
     
@@ -220,8 +202,6 @@ void MainWindow::updateNextScanButton()
     if (loadCommand && imageHandler) {
         bool canLoad = loadCommand->canLoadNextScan();
         nextScanButton->setEnabled(canLoad);
-        // Отладочная информация (можно убрать после проверки)
-        // qDebug() << "updateNextScanButton: canLoad =" << canLoad;
     } else {
         nextScanButton->setEnabled(false);
     }

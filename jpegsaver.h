@@ -6,7 +6,6 @@
 #include <QtGui/QImage>
 #include <QtCore/QString>
 
-// Command Pattern: Команда сохранения изображения
 class SaveImageCommand {
 public:
     SaveImageCommand(ImageHandler* handler, const QString& filename, const QImage& image,

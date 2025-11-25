@@ -7,7 +7,6 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     
-    // Демонстрация функционала
     qDebug() << "=== JPEG Viewer Application ===";
     qDebug() << "Demonstrating design patterns:";
     qDebug() << "1. Strategy Pattern - JPEG loading/saving strategies";
@@ -16,7 +15,6 @@ int main(int argc, char *argv[])
     qDebug() << "4. Command Pattern - Load/Save operations";
     qDebug() << "";
     
-    // Демонстрация Factory Pattern
     qDebug() << "Factory Pattern: Creating handlers";
     ImageHandler* standardHandler = ImageHandler::createHandler(ImageHandler::Standard);
     ImageHandler* progressiveHandler = ImageHandler::createHandler(ImageHandler::Progressive);
@@ -25,14 +23,12 @@ int main(int argc, char *argv[])
     delete standardHandler;
     delete progressiveHandler;
     
-    // Демонстрация Strategy Pattern
     qDebug() << "";
     qDebug() << "Strategy Pattern: Different JPEG strategies available";
     StandardJPEGStrategy standardStrategy;
     ProgressiveJPEGStrategy progressiveStrategy;
     qDebug() << "Strategies initialized successfully";
-    
-    // Создание и отображение главного окна
+
     MainWindow window;
     window.show();
     
@@ -44,4 +40,3 @@ int main(int argc, char *argv[])
     
     return app.exec();
 }
-

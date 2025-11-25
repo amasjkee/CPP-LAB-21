@@ -6,7 +6,6 @@
 #include <QtGui/QImage>
 #include <QtCore/QString>
 
-// Observer Pattern: Уведомления о загрузке изображений
 class ImageLoadObserver {
 public:
     virtual ~ImageLoadObserver() = default;
@@ -14,7 +13,6 @@ public:
     virtual void onLoadError(const QString& error) = 0;
 };
 
-// Command Pattern: Команда загрузки изображения
 class LoadImageCommand {
 public:
     LoadImageCommand(ImageHandler* handler, const QString& filename, ImageLoadObserver* observer)
